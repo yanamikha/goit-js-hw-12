@@ -59,7 +59,7 @@ export function createGallery(images) {
     `;
   });
 
-  galleryEl.innerHTML = gallery.join('');
+  galleryEl.innerHTML += gallery.join('');
   lightbox.refresh();
 }
 

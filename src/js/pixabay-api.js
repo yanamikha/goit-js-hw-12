@@ -18,7 +18,7 @@ export async function getImagesByQuery(query, page) {
         safesearch: true
       }
     })
-    .then(response => response.data.hits)
+    .then(response => response.data)
     .catch(error => {
       let options = {
         theme: 'dark',
@@ -26,7 +26,7 @@ export async function getImagesByQuery(query, page) {
         maxWidth: 432,
         backgroundColor: '#EF4040',
         icon: 'fa-solid fa-triangle-exclamation',
-        message: 'Error on data loading'
+        message: error
       };
       iziToast.show(options);
     });
