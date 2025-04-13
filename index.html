@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link
+      href="https://fonts.googleapis.com/css?family=Montserrat"
+      rel="stylesheet"
+    />
+    <script type="module" crossorigin src="/goit-js-hw-12/index.js"></script>
+    <link rel="modulepreload" crossorigin href="/goit-js-hw-12/assets/vendor-CpJWJOGi.js">
+    <link rel="stylesheet" crossorigin href="/goit-js-hw-12/assets/vendor-B4HQQO9O.css">
+    <link rel="stylesheet" crossorigin href="/goit-js-hw-12/assets/index-CH4pBIc2.css">
+  </head>
+  <body>
+    <div class="container">
+      <form class="form">
+        <label>
+          <input
+            type="text"
+            name="search-text"
+            placeholder="Search images..."
+            required
+          />
+        </label>
+        <button type="submit">Search</button>
+      </form>
+      <div class="gallery-container">
+        <span id="loader" class="loader"></span>
+        <ul class="gallery"></ul>
+        <div id="loaderText"></div>
+      </div>
+      <button id="load-more-btn">Load more</button>
+    </div>
+  </body>
+</html>
