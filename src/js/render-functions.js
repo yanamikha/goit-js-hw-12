@@ -16,7 +16,7 @@ let lightbox = new SimpleLightbox('.gallery a', {
   captionDelay: 250
 });
 
-export function createGallery(images) {
+export function createGallery(images, append = false) {
   if (images.length === 0) {
     let options = {
       theme: 'dark',
@@ -27,39 +27,47 @@ export function createGallery(images) {
       message:
         'Sorry, there are no images matching your search query. Please try again!'
     };
+
     iziToast.show(options);
     return;
   }
 
-  let gallery = images.map(function (props) {
-    let {
-      webformatURL,
-      largeImageURL,
-      tags,
-      likes,
-      views,
-      comments,
-      downloads
-    } = props;
-    return `<li class="gallery-item">
-      <a href="${largeImageURL}" class="gallery-link">
-        <img
-            class="gallery-image"
-            src="${webformatURL}" 
-            alt="${tags}"
-        />
-        <div class="image-description">
-          <div><h2>Likes</h2><p>${likes}</p></div>
-          <div><h2>Views</h2><p>${views}</p></div>
-          <div><h2>Comments</h2><p>${comments}</p></div>
-          <div><h2>Downloads</h2><p>${downloads}</p></div>
-        </div>
-      </a>
-      </li>
-    `;
-  });
+  const galleryMarkup = images
+    .map(
+      ({
+        webformatURL,
+        largeImageURL,
+        tags,
+        likes,
+        views,
+        comments,
+        downloads
+      }) => `
+        <li class="gallery-item">
+          <a href="${largeImageURL}" class="gallery-link">
+            <img
+              class="gallery-image"
+              src="${webformatURL}"
+              alt="${tags}"
+            />
+            <div class="image-description">
+              <div><h2>Likes</h2><p>${likes}</p></div>
+              <div><h2>Views</h2><p>${views}</p></div>
+              <div><h2>Comments</h2><p>${comments}</p></div>
+              <div><h2>Downloads</h2><p>${downloads}</p></div>
+            </div>
+          </a>
+        </li>
+      `
+    )
+    .join('');
 
-  galleryEl.innerHTML += gallery.join('');
+  if (append) {
+    galleryEl.insertAdjacentHTML('beforeend', galleryMarkup);
+  } else {
+    galleryEl.innerHTML = galleryMarkup;
+  }
+
   lightbox.refresh();
 }
 
@@ -68,12 +76,12 @@ export function clearGallery() {
 }
 
 export function showLoader() {
-  loaderTextEl.innerHTML = 'Loading images, please wait...';
+  loaderTextEl.textContent = 'Loading images, please wait...';
   loaderEl.classList.add('loader');
 }
 
 export function hideLoader() {
-  loaderTextEl.innerHTML = null;
+  loaderTextEl.textContent = '';
   loaderEl.classList.remove('loader');
 }
 

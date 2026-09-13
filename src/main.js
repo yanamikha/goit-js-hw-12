@@ -29,51 +29,50 @@ const perPage = 15;
 hideLoadMoreButton();
 hideLoader();
 
-function getImages(isLoadMore = false) {
-  return getImagesByQuery(query, page, perPage).then(data => {
-    const images = data.hits;
+async function getImages(isLoadMore = false) {
+  const data = await getImagesByQuery(query, page, perPage);
+  const images = data.hits;
 
-    if (images.length === 0) {
-      hideLoadMoreButton();
+  if (images.length === 0) {
+    hideLoadMoreButton();
 
-      iziToast.show({
-        ...options,
-        message: 'No image available.'
+    iziToast.show({
+      ...options,
+      message: 'No image available.'
+    });
+
+    return;
+  }
+
+  createGallery(images);
+
+  // Скролл только после Load More
+  if (isLoadMore) {
+    const card = document.querySelector('.gallery-item');
+
+    if (card) {
+      const cardHeight = card.getBoundingClientRect().height;
+
+      window.scrollBy({
+        top: cardHeight * 2,
+        behavior: 'smooth'
       });
-
-      return;
     }
+  }
 
-    createGallery(images);
+  if (page * perPage >= data.totalHits) {
+    hideLoadMoreButton();
 
-    // Скролл только после Load More
-    if (isLoadMore) {
-      const card = document.querySelector('.gallery-item');
-
-      if (card) {
-        const cardHeight = card.getBoundingClientRect().height;
-
-        window.scrollBy({
-          top: cardHeight * 2,
-          behavior: 'smooth'
-        });
-      }
-    }
-
-    if (page * perPage >= data.totalHits) {
-      hideLoadMoreButton();
-
-      iziToast.show({
-        ...options,
-        message: "We're sorry, but you've reached the end of search results."
-      });
-    } else {
-      showLoadMoreButton();
-    }
-  });
+    iziToast.show({
+      ...options,
+      message: "We're sorry, but you've reached the end of search results."
+    });
+  } else {
+    showLoadMoreButton();
+  }
 }
 
-form.addEventListener('submit', event => {
+form.addEventListener('submit', async event => {
   event.preventDefault();
 
   const inputEl = form.querySelector('input');
@@ -94,42 +93,42 @@ form.addEventListener('submit', event => {
   hideLoadMoreButton();
   showLoader();
 
-  getImages()
-    .catch(error => {
-      hideLoadMoreButton();
+  try {
+    await getImages();
+  } catch (error) {
+    hideLoadMoreButton();
 
-      iziToast.show({
-        ...options,
-        message: 'Something went wrong. Please try again!'
-      });
-
-      console.error(error);
-    })
-    .finally(() => {
-      hideLoader();
+    iziToast.show({
+      ...options,
+      message: 'Something went wrong. Please try again!'
     });
+
+    console.error(error);
+  } finally {
+    hideLoader();
+  }
 
   inputEl.value = '';
 });
 
-loadMoreBtn.addEventListener('click', () => {
+loadMoreBtn.addEventListener('click', async () => {
   page += 1;
 
   hideLoadMoreButton();
   showLoader();
 
-  getImages(true)
-    .catch(error => {
-      page -= 1;
+  try {
+    await getImages(true);
+  } catch (error) {
+    page -= 1;
 
-      iziToast.show({
-        ...options,
-        message: 'Something went wrong. Please try again!'
-      });
-
-      console.error(error);
-    })
-    .finally(() => {
-      hideLoader();
+    iziToast.show({
+      ...options,
+      message: 'Something went wrong. Please try again!'
     });
+
+    console.error(error);
+  } finally {
+    hideLoader();
+  }
 });
