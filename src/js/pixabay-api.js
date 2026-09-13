@@ -7,6 +7,7 @@ let BASE_URL = 'https://pixabay.com/api/';
 
 export async function getImagesByQuery(query, page, per_page) {
   try {
+    per_page = per_page >= 15 ? per_page : 15;
     const response = await axios.get(BASE_URL, {
       params: {
         key: API_KEY,
