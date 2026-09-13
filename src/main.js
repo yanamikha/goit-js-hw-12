@@ -7,79 +7,129 @@ import {
   showLoadMoreButton,
   hideLoadMoreButton
 } from './js/render-functions.js';
+
 import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
 
-hideLoadMoreButton();
-hideLoader();
-let form = document.querySelector('form');
-let options = {
+const form = document.querySelector('form');
+const loadMoreBtn = document.querySelector('#load-more-btn');
+
+const options = {
   theme: 'dark',
   position: 'topRight',
   maxWidth: 432,
   backgroundColor: '#EF4040',
   icon: 'fa-solid fa-triangle-exclamation'
 };
+
 let query = '';
 let page = 1;
-let per_page = 15;
-let getImages = () =>
-  getImagesByQuery(query, page, per_page).then(data => {
-    var images = data.data.hits;
+const perPage = 15;
+
+hideLoadMoreButton();
+hideLoader();
+
+function getImages(isLoadMore = false) {
+  return getImagesByQuery(query, page, perPage).then(data => {
+    const images = data.hits;
+
     if (images.length === 0) {
-      iziToast.show({ message: 'No image available.' });
+      hideLoadMoreButton();
+
+      iziToast.show({
+        ...options,
+        message: 'No image available.'
+      });
+
       return;
     }
+
     createGallery(images);
-    let card = document.querySelector('.gallery-item');
-    if (card) {
-      window.scrollBy({
-        top: window.innerHeight + card.getBoundingClientRect().height,
-        behavior: 'smooth'
-      });
+
+    // Скролл только после Load More
+    if (isLoadMore) {
+      const card = document.querySelector('.gallery-item');
+
+      if (card) {
+        const cardHeight = card.getBoundingClientRect().height;
+
+        window.scrollBy({
+          top: cardHeight * 2,
+          behavior: 'smooth'
+        });
+      }
     }
-    if (page * per_page >= data.totalHits) {
+
+    if (page * perPage >= data.totalHits) {
       hideLoadMoreButton();
+
       iziToast.show({
-        message: `We're sorry, but you've reached the end of search results.`
+        ...options,
+        message: "We're sorry, but you've reached the end of search results."
       });
     } else {
       showLoadMoreButton();
     }
   });
+}
+
 form.addEventListener('submit', event => {
   event.preventDefault();
-  clearGallery();
-  let inputEl = form.querySelector('input');
+
+  const inputEl = form.querySelector('input');
   query = inputEl.value.trim();
-  options.message = 'Enter search param';
+
   if (!query) {
-    iziToast.show(options);
+    iziToast.show({
+      ...options,
+      message: 'Enter search param'
+    });
+
     return;
   }
-  inputEl.value = '';
+
   page = 1;
-  getImages(query, page);
+
+  clearGallery();
+  hideLoadMoreButton();
+  showLoader();
+
+  getImages()
+    .catch(error => {
+      hideLoadMoreButton();
+
+      iziToast.show({
+        ...options,
+        message: 'Something went wrong. Please try again!'
+      });
+
+      console.error(error);
+    })
+    .finally(() => {
+      hideLoader();
+    });
+
+  inputEl.value = '';
 });
 
-let loadMoreBtn = document.querySelector('#load-more-btn');
-loadMoreBtn.addEventListener('click', async () => {
-  page++;
-  showLoader();
+loadMoreBtn.addEventListener('click', () => {
+  page += 1;
+
   hideLoadMoreButton();
-  try {
-    getImages(query, page);
-  } catch (error) {
-    let options = {
-      theme: 'dark',
-      position: 'topRight',
-      maxWidth: 432,
-      backgroundColor: '#EF4040',
-      icon: 'fa-solid fa-triangle-exclamation',
-      message: error
-    };
-    iziToast.show(options);
-  } finally {
-    hideLoader();
-  }
+  showLoader();
+
+  getImages(true)
+    .catch(error => {
+      page -= 1;
+
+      iziToast.show({
+        ...options,
+        message: 'Something went wrong. Please try again!'
+      });
+
+      console.error(error);
+    })
+    .finally(() => {
+      hideLoader();
+    });
 });
