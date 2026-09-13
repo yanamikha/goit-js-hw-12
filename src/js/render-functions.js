@@ -18,6 +18,11 @@ let lightbox = new SimpleLightbox('.gallery a', {
 
 export function createGallery(images, append = false) {
   if (images.length === 0) {
+    if (!append) {
+      galleryEl.innerHTML = '';
+      lightbox.refresh();
+    }
+
     let options = {
       theme: 'dark',
       position: 'topRight',
@@ -32,9 +37,9 @@ export function createGallery(images, append = false) {
     return;
   }
 
-  const galleryMarkup = images
-    .map(
-      ({
+  let galleryMarkup = images
+    .map(function (props) {
+      let {
         webformatURL,
         largeImageURL,
         tags,
@@ -42,7 +47,9 @@ export function createGallery(images, append = false) {
         views,
         comments,
         downloads
-      }) => `
+      } = props;
+
+      return `
         <li class="gallery-item">
           <a href="${largeImageURL}" class="gallery-link">
             <img
@@ -58,8 +65,8 @@ export function createGallery(images, append = false) {
             </div>
           </a>
         </li>
-      `
-    )
+      `;
+    })
     .join('');
 
   if (append) {
@@ -73,22 +80,23 @@ export function createGallery(images, append = false) {
 
 export function clearGallery() {
   galleryEl.innerHTML = '';
+  lightbox.refresh();
 }
 
 export function showLoader() {
   loaderTextEl.textContent = 'Loading images, please wait...';
-  loaderEl.classList.add('loader');
+  loaderEl.classList.remove('hidden');
 }
 
 export function hideLoader() {
   loaderTextEl.textContent = '';
-  loaderEl.classList.remove('loader');
+  loaderEl.classList.add('hidden');
 }
 
 export function showLoadMoreButton() {
-  loadMoreBtn.style.display = 'block';
+  loadMoreBtn.classList.remove('hidden');
 }
 
 export function hideLoadMoreButton() {
-  loadMoreBtn.style.display = 'none';
+  loadMoreBtn.classList.add('hidden');
 }
